@@ -60,15 +60,15 @@ void Foam::dynamicCode::checkSecurity
     const dictionary& dict
 )
 {
-    if (isAdministrator())
-    {
-        FatalIOErrorInFunction(dict)
-            << "This code should not be executed by someone with administrator"
-            << " rights due to security reasons." << nl
-            << "(it writes a shared library which then gets loaded "
-            << "using dlopen)"
-            << exit(FatalIOError);
-    }
+    // if (isAdministrator())
+    // {
+    //     FatalIOErrorInFunction(dict)
+    //         << "This code should not be executed by someone with administrator"
+    //         << " rights due to security reasons." << nl
+    //         << "(it writes a shared library which then gets loaded "
+    //         << "using dlopen)"
+    //         << exit(FatalIOError);
+    // }
 
     if (!allowSystemOperations)
     {
