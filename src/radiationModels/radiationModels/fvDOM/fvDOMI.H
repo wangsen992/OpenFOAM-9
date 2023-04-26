@@ -70,6 +70,10 @@ inline const Foam::volScalarField& Foam::radiationModels::fvDOM::a() const
     return a_;
 }
 
+inline const Foam::PtrList<Foam::volScalarField>& Foam::radiationModels::fvDOM::aLambda () const
+{
+    return aLambda_;
+}
 
 inline const Foam::volScalarField& Foam::radiationModels::fvDOM::aLambda
 (

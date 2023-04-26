@@ -103,6 +103,12 @@ void Foam::gradientEnergyFvPatchScalarField::updateCoeffs()
      || isA<fixedGradientFvPatchScalarField>(Tp)
     )
     {
+        Info << "[gradientEnergy] if fixedGradient " << thermo.T().db().time().timeName() << endl;
+        Info << "[gradientEnergy] Tp.snGrad() =  " << average(Tp.snGrad()) << endl;
+        Info << "[gradientEnergy] Cpv =  " << average(thermo.Cpv(Tp,patchi)) << endl;
+        Info << "[gradientEnergy] thermo.he(Tp, patchi) =  " << average(thermo.he(Tp, patchi)) << endl;
+        Info << "[gradientEnergy] thermo.he(Tp, patch().faceCells()) =  " << average(thermo.he(Tp, patch().faceCells())) << endl;
+
         gradient() =
             thermo.Cpv(Tp, patchi)*Tp.snGrad()
           + patch().deltaCoeffs()*

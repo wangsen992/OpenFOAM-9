@@ -84,3 +84,7 @@ doc/Doxygen/DTAGS
 
 # Ignore the test directory
 /tutorialsTest
+
+# Ignore from Sen Wang
+.cache/
+*.json

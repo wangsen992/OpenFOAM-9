@@ -67,6 +67,10 @@ correctDmdtfs()
             )
             {
                 const word& specie = *specieIter;
+                Info << "[InterfaceCompositionPhaseChangePhaseSystem|correctDmdtfs] forAllConstIter on species, pair, pairPhase, index: " 
+                  << specie << ", " << pair.name() << ", " << phase.name() 
+                  << ", " << pairIter.index()
+                  << endl;
 
                 *dmdtfs_[pair] +=
                     (pairIter.index() == 0 ? +1 : -1)
@@ -384,12 +388,15 @@ Foam::InterfaceCompositionPhaseChangePhaseSystem<BasePhaseSystem>::dmdtf
 {
     tmp<volScalarField> tDmdtf = BasePhaseSystem::dmdtf(key);
 
+    Info << "[InterfaceCompositionPhaseChangePhaseSystem|dmdtf] key = " << key << ";";
     if (dmdtfs_.found(key))
     {
         const label dmdtSign(Pair<word>::compare(this->phasePairs_[key], key));
+        Info << "found key, sign = " << dmdtSign;
 
         tDmdtf.ref() += dmdtSign**dmdtfs_[key];
     }
+    Info << endl;
 
     return tDmdtf;
 }
@@ -452,11 +459,13 @@ Foam::autoPtr<Foam::phaseSystem::heatTransferTable>
 Foam::InterfaceCompositionPhaseChangePhaseSystem<BasePhaseSystem>::
 heatTransfer() const
 {
+    Info << "[InterfaceComposition] Enter heatTransfer()" << endl;
     autoPtr<phaseSystem::heatTransferTable> eqnsPtr =
         BasePhaseSystem::heatTransfer();
 
     phaseSystem::heatTransferTable& eqns = eqnsPtr();
 
+    Info << "[InterfaceComposition] Apply addDmidtHefs()" << endl;
     this->addDmidtHefs
     (
         totalDmidtfs(),
@@ -475,6 +484,7 @@ Foam::autoPtr<Foam::phaseSystem::specieTransferTable>
 Foam::InterfaceCompositionPhaseChangePhaseSystem<BasePhaseSystem>::
 specieTransfer() const
 {
+    Info << "[InterfaceCompositionPhaseChangePhaseSystem] specieTransfer() " << endl;
     autoPtr<phaseSystem::specieTransferTable> eqnsPtr =
         BasePhaseSystem::specieTransfer();
 
@@ -495,6 +505,7 @@ specieTransfer() const
     {
         const phasePair& pair =
             this->phasePairs_[interfaceCompositionModelIter.key()];
+        Info << "[InterfaceCompositionPhaseChangePhaseSystem] forAllConstIter on interfaceCompositionModels_: " << pair.name() << endl;
 
         forAllConstIter(phasePair, pair, pairIter)
         {
@@ -508,6 +519,8 @@ specieTransfer() const
 
             const phaseModel& phase = *pairIter;
             const phaseModel& otherPhase = pairIter.otherPhase();
+            Info << "[InterfaceCompositionPhaseChangePhaseSystem] forAllConstIter on phasePair: "
+                 << phase.name() << " and " << otherPhase.name() << endl;
 
             forAllConstIter
             (
@@ -517,8 +530,27 @@ specieTransfer() const
             )
             {
                 const word& specie = *specieIter;
+                Info << "[InterfaceCompositionPhaseChangePhaseSystem] forAllConstIter on species: "
+                     << specie << endl;
+
+                volScalarField dmidtf
+                (
+                        *(*dmidtfSus_[pair])[specie]
+                      + *(*dmidtfSps_[pair])[specie]*phase.Y(specie)
+                );
+                Info<< "[InterfaceCompositionPhaseChangePhaseSystem] phase.Y(specie) of " 
+                    << ": gMin = " <<      gMin(phase.Y(specie).primitiveField())
+                    << ", mean = " << gAverage(phase.Y(specie).primitiveField())
+                    << ", max = " <<      gMax(phase.Y(specie).primitiveField())
+                    << endl;
+                Info<< "[InterfaceCompositionPhaseChangePhaseSystem] dmidtf (explicit) " 
+                    << ": min = " <<      gMin(dmidtf.primitiveField())
+                    << ", mean = " << gAverage(dmidtf.primitiveField())
+                    << ", max = " <<      gMax(dmidtf.primitiveField())
+                    << endl;
 
                 // Implicit transport through this phase
+                // [Test] using explicit transport for species equation here
                 *eqns[phase.Y(specie).name()] +=
                     *(*dmidtfSus_[pair])[specie]
                   + fvm::Sp(*(*dmidtfSps_[pair])[specie], phase.Y(specie));
@@ -569,6 +601,9 @@ correct()
 
             const phaseModel& phase = *pairIter;
 
+            Info<< "[InterfaceCompositionPhaseChangePhaseSystem] diffusiveMassTransfer " 
+                << diffusiveMassTransferModels_[pair][pairIter.index()]->name()
+                << endl;
             const volScalarField K
             (
                 diffusiveMassTransferModels_[pair][pairIter.index()]->K()
@@ -585,6 +620,21 @@ correct()
 
                 const volScalarField KD(K*compositionModel.D(specie));
                 const volScalarField Yf(compositionModel.Yf(specie, Tf));
+                Info<< "[InterfaceCompositionPhaseChangePhaseSystem] K for  "  << specie
+                    << ": min = " <<      min(K.primitiveField())
+                    << ", mean = " << average(K.primitiveField())
+                    << ", max = " <<      max(K.primitiveField())
+                    << endl;
+                Info<< "[InterfaceCompositionPhaseChangePhaseSystem] D for  "  << specie
+                    << ": min = " <<      min(compositionModel.D(specie)->primitiveField())
+                    << ", mean = " << average(compositionModel.D(specie)->primitiveField())
+                    << ", max = " <<      max(compositionModel.D(specie)->primitiveField())
+                    << endl;
+                Info<< "[InterfaceCompositionPhaseChangePhaseSystem] Yf for  "  << specie
+                    << ": min = " <<      min(Yf.primitiveField())
+                    << ", mean = " << average(Yf.primitiveField())
+                    << ", max = " <<      max(Yf.primitiveField())
+                    << endl;
 
                 *(*dmidtfSus_[pair])[specie] = phase.rho()*KD*Yf;
                 *(*dmidtfSps_[pair])[specie] = - phase.rho()*KD;
@@ -632,6 +682,10 @@ correctInterfaceThermo()
     // Yfi is likely to be a strong non-linear (typically exponential) function
     // of Tf, so the solution for the temperature is newton-accelerated.
 
+    Info << "[InterfaceComposition] Entering correctInterfaceThermo() " << endl;
+    BasePhaseSystem::correctInterfaceThermo();
+
+    // First loop 
     forAllConstIter
     (
         interfaceCompositionModelTable,
@@ -642,7 +696,10 @@ correctInterfaceThermo()
         const phasePair& pair =
             this->phasePairs_[interfaceCompositionModelIter.key()];
 
+        Info << "[InterfaceComposition] First loop, Pair " << pair.name() << endl;
+        Info << "[InterfaceComposition] heatTransferModels_[pair].first() " << pair.name() << endl;
         const volScalarField H1(this->heatTransferModels_[pair].first()->K());
+        Info << "[InterfaceComposition] heatTransferModels_[pair].second() " << pair.name() << endl;
         const volScalarField H2(this->heatTransferModels_[pair].second()->K());
         const dimensionedScalar HSmall("small", heatTransferModel::dimK, small);
 
@@ -656,6 +713,7 @@ correctInterfaceThermo()
 
         for (label i = 0; i < nInterfaceCorrectors_; ++ i)
         {
+            Info << "[interfaceComposition] interfaceCorrector: " << i << endl;
             tmp<volScalarField> dmdtLf =
                 volScalarField::New
                 (
@@ -670,10 +728,18 @@ correctInterfaceThermo()
                     this->mesh(),
                     dimensionedScalar(dmdtLf().dimensions()/dimTemperature, 0)
                 );
+            tmp<volScalarField> Li =
+                volScalarField::New
+                (
+                    IOobject::groupName("Li", pair.name()),
+                    this->mesh(),
+                    dimensionedScalar(dimEnergy/dimMass, 0)
+                );
 
             // Add latent heats from forward and backward models
             forAllConstIter(phasePair, pair, pairIter)
             {
+                Info << "[InterfaceComposition] Second loop, Pair " << pairIter.index() << " of " << pair.name() << endl;
                 if (interfaceCompositions[pairIter.index()].valid())
                 {
                     const BlendedInterfacialModel<diffusiveMassTransferModel>&
@@ -705,6 +771,34 @@ correctInterfaceThermo()
                             interfaceComposition.dYfPrime(specie, Tf)
                         );
 
+                        Info<< "[InterfaceComposition] Tf." << pair.name()
+                            << ": min = " << min(Tf.primitiveField())
+                            << ", mean = " << average(Tf.primitiveField())
+                            << ", max = " << max(Tf.primitiveField())
+                            << endl;
+                        Li.ref() = this->Li
+                                    (
+                                        pair,
+                                        specie,
+                                        dY,
+                                        Tf,
+                                        latentHeatScheme::symmetric
+                                    );
+                        Info<< "[InterfaceComposition] Li." << pair.name()
+                            << ": min = " <<      min(Li->primitiveField())
+                            << ", mean = " << average(Li->primitiveField())
+                            << ", max = " <<      max(Li->primitiveField())
+                            << endl;
+                        Info<< "[InterfaceComposition] dY." << pair.name()
+                            << ": gMin = " <<      gMin(dY.primitiveField())
+                            << ", mean = " << gAverage(dY.primitiveField())
+                            << ", max = " <<      gMax(dY.primitiveField())
+                            << endl;
+                        Info<< "[InterfaceComposition] dYfPrime." << pair.name()
+                            << ": min = " <<      gMin(dYfPrime.primitiveField())
+                            << ", mean = " << gAverage(dYfPrime.primitiveField())
+                            << ", max = " <<      gMax(dYfPrime.primitiveField())
+                            << endl;
                         const volScalarField rhoKDL
                         (
                             pairIter().thermo().rho()
@@ -728,6 +822,55 @@ correctInterfaceThermo()
 
             // Update the interface temperature by applying one step of newton's
             // method to the interface relation
+            Info<< "[InterfaceComposition] Tf." << pair.name()
+                << ": min = " << min(Tf.primitiveField())
+                << ", mean = " << average(Tf.primitiveField())
+                << ", max = " << max(Tf.primitiveField())
+                << endl;
+            Info<< "[InterfaceComposition] T1." << pair.name()
+                << ": min = " <<      min(pair.phase1().thermo().T().primitiveField())
+                << ", mean = " << average(pair.phase1().thermo().T().primitiveField())
+                << ", max = " <<      max(pair.phase1().thermo().T().primitiveField())
+                << endl;
+            Info<< "[InterfaceComposition] T2." << pair.name()
+                << ": min = " <<      min(pair.phase2().thermo().T().primitiveField())
+                << ", mean = " << average(pair.phase2().thermo().T().primitiveField())
+                << ", max = " <<      max(pair.phase2().thermo().T().primitiveField())
+                << endl;
+            Info<< "[InterfaceComposition] H1." << pair.name()
+                << ": min = " <<      min(H1.primitiveField())
+                << ", mean = " << average(H1.primitiveField())
+                << ", max = " <<      max(H1.primitiveField())
+                << endl;
+            Info<< "[InterfaceComposition] H2." << pair.name()
+                << ": min = " <<      min(H2.primitiveField())
+                << ", mean = " << average(H2.primitiveField())
+                << ", max = " <<      max(H2.primitiveField())
+                << endl;
+            Info<< "[InterfaceComposition] dmdtLf." << pair.name()
+                << ": min = " <<      min(dmdtLf->primitiveField())
+                << ", mean = " << average(dmdtLf->primitiveField())
+                << ", max = " <<      max(dmdtLf->primitiveField())
+                << endl;
+            Info<< "[InterfaceComposition] dmdtLfPrime." << pair.name()
+                << ": min = " <<      min(dmdtLfPrime->primitiveField())
+                << ", mean = " << average(dmdtLfPrime->primitiveField())
+                << ", max = " <<      max(dmdtLfPrime->primitiveField())
+                << endl;
+            Info << "[InterfaceComposition] HSmall = " << HSmall << endl;
+            // tmp<volScalarField> TfDenom =
+            //     volScalarField::New
+            //     (
+            //         IOobject::groupName("TfDenom", pair.name()),
+            //         this->mesh(),
+            //         dimensionedScalar(H1.dimensions(), 0)
+            //     );
+            // TfDenom.ref() = H1 + H2 - dmdtLfPrime;
+            // Info<< "[InterfaceComposition] H1 + H2 - dmdtLfPrime" << pair.name()
+            //     << ": min = " <<      min(TfDenom->primitiveField())
+            //     << ", mean = " << average(TfDenom->primitiveField())
+            //     << ", max = " <<      max(TfDenom->primitiveField())
+            //     << endl;
             Tf -=
                 (
                     H1*(Tf - pair.phase1().thermo().T())
@@ -740,7 +883,7 @@ correctInterfaceThermo()
 
             Tf.correctBoundaryConditions();
 
-            Info<< "Tf." << pair.name()
+            Info<< "[InterfaceComposition] Tf." << pair.name()
                 << ": min = " << min(Tf.primitiveField())
                 << ", mean = " << average(Tf.primitiveField())
                 << ", max = " << max(Tf.primitiveField())

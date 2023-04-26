@@ -200,6 +200,7 @@ void Foam::wideBandDiffusiveRadiationMixedFvPatchScalarField::updateCoeffs()
     scalarField& qem = ray.qem().boundaryFieldRef()[patchi];
     scalarField& qin = ray.qin().boundaryFieldRef()[patchi];
 
+
     // Use updated Ir while iterating over rays
     // avoids to used lagged qin
     scalarField Ir = dom.IRay(0).qin().boundaryField()[patchi];
@@ -218,6 +219,7 @@ void Foam::wideBandDiffusiveRadiationMixedFvPatchScalarField::updateCoeffs()
             // direction out of the wall
             refGrad()[facei] = 0.0;
             valueFraction()[facei] = 1.0;
+
             refValue()[facei] =
                 (
                     Ir[facei]*(1.0 - temissivity[facei])
@@ -225,7 +227,7 @@ void Foam::wideBandDiffusiveRadiationMixedFvPatchScalarField::updateCoeffs()
                 )/pi;
 
             // Emitted heat flux from this ray direction
-            qem[facei] = refValue()[facei]*nAve[facei];
+            qem[facei] += refValue()[facei]*nAve[facei];
         }
         else
         {
@@ -235,10 +237,18 @@ void Foam::wideBandDiffusiveRadiationMixedFvPatchScalarField::updateCoeffs()
             refValue()[facei] = 0.0; // not used
 
             // Incident heat flux on this ray direction
-            qin[facei] = Iw[facei]*nAve[facei];
+            qin[facei] += Iw[facei]*nAve[facei];
         }
     }
 
+    if (this->patch().name() == "floor")
+    {
+    Info << "average(Iw) = " << average(Iw) << ", " << rayId << ", " 
+         
+         << lambdaId << ", " << dom.IRay(rayId).dAve() 
+         << ", " << average(Iw * nAve) << ", "
+         << average(dom.blackBody().bLambda(lambdaId).boundaryField()[patchi]) << endl;
+    }
     // Restore tag
     UPstream::msgType() = oldTag;
 

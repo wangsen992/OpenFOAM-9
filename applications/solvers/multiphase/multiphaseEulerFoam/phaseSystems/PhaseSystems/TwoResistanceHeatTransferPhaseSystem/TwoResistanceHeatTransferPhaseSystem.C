@@ -204,13 +204,14 @@ TwoResistanceHeatTransferPhaseSystem
 :
     HeatTransferPhaseSystem<BasePhaseSystem>(mesh)
 {
+    Info << "[TwoResistance] TwoResistanceHeatTransferPhaseSystem Init." << endl;
     this->generatePairsAndSubModels
     (
         "heatTransfer",
         heatTransferModels_,
         false
     );
-
+    Info << "[TwoResistance] size of heatTransferModels_" << heatTransferModels_.size() << endl;
     // Check that models have been specified on both sides of the interfaces
     forAllConstIter
     (
@@ -220,6 +221,7 @@ TwoResistanceHeatTransferPhaseSystem
     )
     {
         const phasePair& pair = this->phasePairs_[heatTransferModelIter.key()];
+        Info << "[TwoResistance] " << pair << " model: " << heatTransferModels_[pair].first()->name() << " and " << heatTransferModels_[pair].second()->name() << endl;
 
         if (!heatTransferModels_[pair].first().valid())
         {
@@ -254,6 +256,7 @@ Foam::autoPtr<Foam::phaseSystem::heatTransferTable>
 Foam::TwoResistanceHeatTransferPhaseSystem<BasePhaseSystem>::
 heatTransfer() const
 {
+    Info << "[TwoResistance] Enter heatTransfer()" << endl;
     autoPtr<phaseSystem::heatTransferTable> eqnsPtr
     (
         new phaseSystem::heatTransferTable()
@@ -279,25 +282,63 @@ heatTransfer() const
         heatTransferModelIter
     )
     {
+        Info << "[TwoResistance] Calculate heatTransfer Iter" << endl;
         const phasePair& pair = this->phasePairs_[heatTransferModelIter.key()];
 
         const phaseModel& phase1 = pair.phase1();
         const phaseModel& phase2 = pair.phase2();
+        Info << "[TwoResistance] Calculate he" << endl;
         const volScalarField& he1 = phase1.thermo().he();
         const volScalarField& he2 = phase2.thermo().he();
+        Info << "[TwoResistance] Calculate Cpv" << endl;
         const volScalarField Cpv1(phase1.thermo().Cpv());
         const volScalarField Cpv2(phase2.thermo().Cpv());
 
+        Info << "[TwoResistance] Calculate K" << endl;
         const volScalarField H1(heatTransferModelIter().first()->K());
         const volScalarField H2(heatTransferModelIter().second()->K());
+        Info << "[TwoResistance] Calculate HEff" << endl;
+        Info << "[TwoResistance]min(H1) = " << min(H1) << endl;
+        Info << "[TwoResistance]min(H2) = " << min(H2) << endl;
+        Info << "[TwoResistance]min(H1+H2) = " << min(H1 + H2) << endl;
         const volScalarField HEff(H1*H2/(H1 + H2));
+        Info<< "[TwoResistance] he1." << pair.name()
+            << ": min = " <<      min(he1.primitiveField())
+            << ", mean = " << average(he1.primitiveField())
+            << ", max = " <<      max(he1.primitiveField())
+            << endl;
+        Info<< "[TwoResistance] he2." << pair.name()
+            << ": min = " <<      min(he2.primitiveField())
+            << ", mean = " << average(he2.primitiveField())
+            << ", max = " <<      max(he2.primitiveField())
+            << endl;
+        Info<< "[TwoResistance] T1." << pair.name()
+            << ": min = " <<      min(pair.phase1().thermo().T().primitiveField())
+            << ", mean = " << average(pair.phase1().thermo().T().primitiveField())
+            << ", max = " <<      max(pair.phase1().thermo().T().primitiveField())
+            << endl;
+        Info<< "[TwoResistance] T2." << pair.name()
+            << ": min = " <<      min(pair.phase2().thermo().T().primitiveField())
+            << ", mean = " << average(pair.phase2().thermo().T().primitiveField())
+            << ", max = " <<      max(pair.phase2().thermo().T().primitiveField())
+            << endl;
+        Info<< "[TwoResistance] HEff." << pair.name()
+            << ": min = " <<      min(HEff.primitiveField())
+            << ", mean = " << average(HEff.primitiveField())
+            << ", max = " <<      max(HEff.primitiveField())
+            << endl;
 
+        Info << "[TwoResistance] Adding heatTrasfer source term to equations. " << endl;
+        Info << "[TwoResistance] Adding source term to " << phase1.name() << endl;
         *eqns[phase1.name()] +=
             HEff*(phase2.thermo().T() - phase1.thermo().T())
-          + H1/Cpv1*he1 - fvm::Sp(H1/Cpv1, he1);
+           + H1/Cpv1*he1 - fvm::Sp(H1/Cpv1, he1);
+
+        Info << "[TwoResistance] Adding source term to " << phase2.name() << endl;
         *eqns[phase2.name()] +=
             HEff*(phase1.thermo().T() - phase2.thermo().T())
-          + H2/Cpv2*he2 - fvm::Sp(H2/Cpv2, he2);
+           + H2/Cpv2*he2 - fvm::Sp(H2/Cpv2, he2);
+        Info << "[TwoResistance] Complete adding heatTrasfer source term to equations. " << endl;
     }
 
     return eqnsPtr;
@@ -310,7 +351,9 @@ correctEnergyTransport()
 {
     BasePhaseSystem::correctEnergyTransport();
 
+    Info << "[TwoResistance] Before entering correctInterfaceThermo()" << endl;
     correctInterfaceThermo();
+    Info << "[TwoResistance] After entering correctInterfaceThermo()" << endl;
 }
 
 

@@ -48,6 +48,7 @@ export FOAM_INST_DIR=$HOME/$WM_PROJECT
 # export FOAM_INST_DIR=~$WM_PROJECT
 # export FOAM_INST_DIR=/opt/$WM_PROJECT
 # export FOAM_INST_DIR=/usr/local/$WM_PROJECT
+export FOAM_INST_DIR=/opt
 #
 # END OF (NORMAL) USER EDITABLE PART
 ################################################################################

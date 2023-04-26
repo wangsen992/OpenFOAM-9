@@ -52,6 +52,7 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 {
     if (this->cyclicPatch().owner())
     {
+        Info << this->patch().name() << " is patch owner. " << endl;
         jump_ = Field<Type>("jump", dict, p.size());
     }
 
@@ -143,9 +144,11 @@ void Foam::fixedJumpFvPatchField<Type>::rmap
 template<class Type>
 void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
 {
-    fvPatchField<Type>::write(os);
-    writeEntry(os, "patchType", this->interfaceFieldType());
+    // fvPatchField<Type>::write(os);
+    // writeEntry(os, "type", type());
+    // writeEntry(os, "patchType", this->interfaceFieldType());
 
+    Info << "Writing fixedJumpFvPatchField..." << endl;
     if (this->cyclicPatch().owner())
     {
         writeEntry(os, "jump", jump_);

@@ -313,7 +313,24 @@ Foam::BlendedInterfacialModel<ModelType>::BlendedInterfacialModel
     model1In2_(model1In2),
     model2In1_(model2In1),
     correctFixedFluxBCs_(correctFixedFluxBCs)
-{}
+{
+    Info << "Phase 1 : " << phase1_.name() << ", Phase 2: " << phase2_.name() << endl;
+    Info << "[BlendedInterfacialModel] model_.valid()? " << model_.valid() << endl;
+    if (model_.valid())
+    {
+    Info << "[BlendedInterfacialModel] model_->type()? " << model_->type() << endl;
+    }
+    Info << "[BlendedInterfacialModel] model1In2_.valid()? " << model1In2_.valid() << endl;
+    if (model1In2_.valid())
+    {
+    Info << "[BlendedInterfacialModel] model1In2_->type()? " << model1In2_->type() << endl;
+    }
+    Info << "[BlendedInterfacialModel] model2In1_.valid()? " << model2In1_.valid() << endl;
+    if (model2In1_.valid())
+    {
+    Info << "[BlendedInterfacialModel] model2In1_->type()? " << model2In1_->type() << endl;
+    }
+}
 
 
 template<class ModelType>
@@ -375,6 +392,22 @@ Foam::BlendedInterfacialModel<ModelType>::BlendedInterfacialModel
                 pair2In1
             ).ptr()
         );
+    }
+    Info << "Phase 1 : " << phase1_.name() << ", Phase 2: " << phase2_.name() << endl;
+    Info << "[BlendedInterfacialModel] model_.valid()? " << model_.valid() << endl;
+    if (model_.valid())
+    {
+    Info << "[BlendedInterfacialModel] model_->type()? " << model_->type() << endl;
+    }
+    Info << "[BlendedInterfacialModel] model1In2_.valid()? " << model1In2_.valid() << endl;
+    if (model1In2_.valid())
+    {
+    Info << "[BlendedInterfacialModel] model1In2_->type()? " << model1In2_->type() << endl;
+    }
+    Info << "[BlendedInterfacialModel] model2In1_.valid()? " << model2In1_.valid() << endl;
+    if (model2In1_.valid())
+    {
+    Info << "[BlendedInterfacialModel] model2In1_->type()? " << model2In1_->type() << endl;
     }
 }
 

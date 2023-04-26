@@ -119,9 +119,15 @@ Foam::saturationModels::ArdenBuck::Tsat
     const volScalarField& p
 ) const
 {
-    NotImplemented;
+    volScalarField Tc
+    (
+      C/2 * 
+      (
+        (B - log(p/A)) - sqrt(pow(B - log(p/A),2.0) - 4.0/C * D * log(p/A))
+      )
+    );
 
-    return volScalarField::null();
+    return Tc + zeroC;
 }
 
 

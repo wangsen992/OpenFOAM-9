@@ -70,7 +70,9 @@ Foam::diffusiveMassTransferModels::sphericalDiffusiveMassTransfer::
 Foam::tmp<Foam::volScalarField>
 Foam::diffusiveMassTransferModels::sphericalDiffusiveMassTransfer::K() const
 {
-    return 60*pair_.dispersed()/sqr(pair_.dispersed().d());
+    // Add a Lewis number term to accelerate condensation rate
+    Info << "[spherical] Addition of Le_ to final result is confirmed." << endl;
+    return 60*pair_.dispersed()/sqr(pair_.dispersed().d()) / Le_;
 }
 
 

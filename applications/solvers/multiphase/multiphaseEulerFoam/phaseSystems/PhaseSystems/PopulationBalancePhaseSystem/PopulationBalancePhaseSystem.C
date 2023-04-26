@@ -42,14 +42,20 @@ PopulationBalancePhaseSystem
         diameterModels::populationBalanceModel::iNew(*this, dmdtfs_)
     )
 {
+    Info << "[PopulationBalancePhaseSystem] Initiating PopulationBalancePhaseSystem. Size = " << populationBalances_.size() << endl;
     forAll(populationBalances_, i)
     {
         const Foam::diameterModels::populationBalanceModel& popBal =
             populationBalances_[i];
+    Info << "[PopulationBalancePhaseSystem] popBal name is  " << popBal.name() << endl;
 
         forAllConstIter(phaseSystem::phasePairTable, popBal.phasePairs(), iter)
         {
             const phasePairKey& key = iter.key();
+            Info << "[PopulationBalancePhaseSystem] key : " 
+                 << key << endl;
+            Info << "[PopulationBalancePhaseSystem] phasePair : " 
+                 << this->phasePairs_[key]->name() << endl;
 
             if (!this->phasePairs_.found(key))
             {
@@ -85,13 +91,16 @@ PopulationBalancePhaseSystem
                             this->phasePairs_[key]->name()
                         ),
                         this->mesh().time().timeName(),
-                        this->mesh()
+                        this->mesh(),
+                        IOobject::NO_READ,
+                        IOMRFZoneList::AUTO_WRITE
                     ),
                     this->mesh(),
                     dimensionedScalar(dimDensity/dimTime, 0)
                 )
             );
         }
+        
     }
 }
 

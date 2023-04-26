@@ -70,6 +70,11 @@ Foam::heatTransferModels::sphericalHeatTransfer::K
     const scalar residualAlpha
 ) const
 {
+    Info << "[spherical]max(pair_.dispersed(), residualAlpha)"
+         << min(max(pair_.dispersed(), residualAlpha)) << endl;
+    Info<< "[spherical]dispersed phase: "  << pair_.dispersed().name();
+    Info << "[spherical]pair_.dispersed().thermo().kappa()"
+         << min(pair_.dispersed().thermo().kappa()) << endl;
     return
         60.0
        *max(pair_.dispersed(), residualAlpha)

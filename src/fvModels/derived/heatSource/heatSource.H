@@ -74,6 +74,9 @@ class heatSource
         //- The heat source
         autoPtr<Function1<scalar>> q_;
 
+        //- phase name
+        word phase_;
+
 
     // Private member functions
 
@@ -124,6 +127,15 @@ public:
             //- Source term to compressible energy equation
             virtual void addSup
             (
+                const volScalarField& rho,
+                fvMatrix<scalar>& eqn,
+                const word& fieldName
+            ) const;
+            
+            //- Source term to compressible energy equation
+            virtual void addSup
+            (
+                const volScalarField& alpha,
                 const volScalarField& rho,
                 fvMatrix<scalar>& eqn,
                 const word& fieldName

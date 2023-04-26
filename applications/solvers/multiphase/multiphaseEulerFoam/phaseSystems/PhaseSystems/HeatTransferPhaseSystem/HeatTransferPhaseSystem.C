@@ -187,6 +187,7 @@ void Foam::HeatTransferPhaseSystem<BasePhaseSystem>::addDmdtHefsWithoutL
     phaseSystem::heatTransferTable& eqns
 ) const
 {
+    Info << "[HeatTransferPhaseSystem] Running addDmdtHefsWithoutL. " << endl;
     // Loop the pairs
     forAllConstIter(phaseSystem::dmdtfTable, dmdtfs, dmdtfIter)
     {
@@ -635,6 +636,16 @@ Foam::HeatTransferPhaseSystem<BasePhaseSystem>::Li
       ? compositionPtr2->Ha(speciei2, thermo2.p(), Tf)
       : thermo2.ha(thermo1.p(), Tf)
     );
+    Info<< "[HeatTransferPhaseSystem] hafi1." << pair.name()
+        << ": min = " <<      min(hafi1.primitiveField())
+        << ", mean = " << average(hafi1.primitiveField())
+        << ", max = " <<      max(hafi1.primitiveField())
+        << endl;
+    Info<< "[HeatTransferPhaseSystem] hafi2." << pair.name()
+        << ": min = " <<      min(hafi2.primitiveField())
+        << ", mean = " << average(hafi2.primitiveField())
+        << ", max = " <<      max(hafi2.primitiveField())
+        << endl;
 
     switch (scheme)
     {

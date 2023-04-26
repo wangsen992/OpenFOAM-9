@@ -848,7 +848,9 @@ void Foam::phaseSystem::correctEnergyTransport()
 {
     forAll(phaseModels_, phasei)
     {
+        Info << "[phaseSystem] correctEnergyTransport for phase " << phaseModels_[phasei].name() << endl;
         phaseModels_[phasei].correctEnergyTransport();
+        Info << "[phaseSystem] Complete correctEnergyTransport for phase " << phaseModels_[phasei].name() << endl;
     }
 }
 

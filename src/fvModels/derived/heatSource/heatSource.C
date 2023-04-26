@@ -98,7 +98,8 @@ Foam::fv::heatSource::heatSource
 :
     fvModel(name, modelType, dict, mesh),
     set_(coeffs(), mesh),
-    q_(nullptr)
+    q_(nullptr),
+    phase_(coeffs().lookupOrDefault("phase", word::null))
 {
     readCoeffs();
 }
@@ -115,7 +116,10 @@ Foam::fv::heatSource::~heatSource()
 Foam::wordList Foam::fv::heatSource::addSupFields() const
 {
     const basicThermo& thermo =
-        mesh().lookupObject<basicThermo>(basicThermo::dictName);
+        mesh().lookupObject<basicThermo>
+        (
+          IOobject::groupName(basicThermo::dictName, phase_)
+        );
 
     return wordList(1, thermo.he().name());
 }
@@ -127,6 +131,7 @@ void Foam::fv::heatSource::addSup
     const word& fieldName
 ) const
 {
+    Info << "Adding heat source. " << endl;
     const labelList& cells = set_.cells();
 
     const scalar t = mesh().time().value();
@@ -149,6 +154,16 @@ void Foam::fv::heatSource::addSup
     addSup(eqn, fieldName);
 }
 
+void Foam::fv::heatSource::addSup
+(
+    const volScalarField& alpha,
+    const volScalarField& rho,
+    fvMatrix<scalar>& eqn,
+    const word& fieldName
+) const
+{
+    addSup(eqn, fieldName);
+}
 
 bool Foam::fv::heatSource::read(const dictionary& dict)
 {

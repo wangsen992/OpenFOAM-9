@@ -498,6 +498,7 @@ template<class BasePhaseSystem>
 void
 Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctInterfaceThermo()
 {
+    Info << "[ThermalPhaseChange] Entering correctInterfaceThermo() " << endl;
     typedef compressible::alphatPhaseChangeWallFunctionFvPatchScalarField
         alphatPhaseChangeWallFunction;
 
@@ -523,6 +524,11 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctInterfaceThermo()
             volScalarField& Tf(*this->Tfs_[pair]);
 
             const volScalarField Tsat(saturationModelIter()->Tsat(thermo1.p()));
+            Info<< Tsat.name()
+                << ": min = " << min(Tsat.primitiveField())
+                << ", mean = " << average(Tsat.primitiveField())
+                << ", max = " << max(Tsat.primitiveField())
+                << endl;
 
             const volScalarField L
             (
@@ -533,6 +539,16 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctInterfaceThermo()
 
             volScalarField H1(this->heatTransferModels_[pair].first()->K(0));
             volScalarField H2(this->heatTransferModels_[pair].second()->K(0));
+            Info<< H1.name()
+                << ": min = " << min(H1.primitiveField())
+                << ", mean = " << average(H1.primitiveField())
+                << ", max = " << max(H1.primitiveField())
+                << endl;
+            Info<< H2.name()
+                << ": min = " << min(H2.primitiveField())
+                << ", mean = " << average(H2.primitiveField())
+                << ", max = " << max(H2.primitiveField())
+                << endl;
 
             volScalarField dmdtfNew((H1*(Tsat - T1) + H2*(Tsat - T2))/L);
 
@@ -576,6 +592,11 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctInterfaceThermo()
 
             Tf = (H1*T1 + H2*T2 + dmdtfNew*L)/(H1 + H2);
 
+            Info<< Tsat.name()
+                << ": min = " << min(Tsat.primitiveField())
+                << ", mean = " << average(Tsat.primitiveField())
+                << ", max = " << max(Tsat.primitiveField())
+                << endl;
             Info<< Tf.name()
                 << ": min = " << min(Tf.primitiveField())
                 << ", mean = " << average(Tf.primitiveField())
@@ -592,6 +613,13 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctInterfaceThermo()
                 << ", mean = " << average(dmdtf.primitiveField())
                 << ", max = " << max(dmdtf.primitiveField())
                 << ", integral = " << fvc::domainIntegrate(dmdtf).value()
+                << endl;
+            Info << "Testing dmdtfNew" << endl;
+            Info<< dmdtfNew.name()
+                << ": min = " << min(dmdtfNew.primitiveField())
+                << ", mean = " << average(dmdtfNew.primitiveField())
+                << ", max = " << max(dmdtfNew.primitiveField())
+                << ", integral = " << fvc::domainIntegrate(dmdtfNew).value()
                 << endl;
         }
 

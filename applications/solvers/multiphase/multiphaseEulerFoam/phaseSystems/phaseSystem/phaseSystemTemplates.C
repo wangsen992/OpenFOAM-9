@@ -39,6 +39,7 @@ void Foam::phaseSystem::createSubModels
     >& models
 )
 {
+    Info << "[phaseSystem] createSubModels dict:  " << modelDicts << endl;
     forAllConstIter(dictTable, modelDicts, iter)
     {
         const phasePairKey& key = iter.key();
@@ -69,6 +70,7 @@ void Foam::phaseSystem::generatePairsAndSubModels
     const bool correctFixedFluxBCs
 )
 {
+    Info << "[phaseSystem] generatePairsAndSubModels-noPair Loading:  " << modelName << endl;
     dictTable modelDicts(lookup(modelName));
 
     generatePairs(modelDicts);
@@ -94,6 +96,7 @@ void Foam::phaseSystem::generatePairsAndSubModels
         HashTable<autoPtr<modelType>, phasePairKey, phasePairKey::hash>
         modelTypeTable;
 
+    Info << "[phaseSystem] generatePairsAndSubModels-Pair Loading:  " << modelName << endl;
     modelTypeTable tempModels;
     generatePairsAndSubModels(modelName, tempModels);
 

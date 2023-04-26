@@ -92,6 +92,21 @@ Foam::tmp<Foam::volScalarField> Foam::interfaceCompositionModel::dY
 ) const
 {
     const label speciei = composition().species()[speciesName];
+    Info<< "[interfaceCompositionModel] Tf." 
+        << ": min = " <<      gMin(Tf.primitiveField())
+        << ", mean = " << gAverage(Tf.primitiveField())
+        << ", max = " <<      gMax(Tf.primitiveField())
+        << endl;
+    Info<< "[interfaceCompositionModel] Yf(speciesName, Tf)" << speciesName
+        << ": min = " <<      gMin(Yf(speciesName, Tf)->primitiveField())
+        << ", mean = " << gAverage(Yf(speciesName, Tf)->primitiveField())
+        << ", max = " <<      gMax(Yf(speciesName, Tf)->primitiveField())
+        << endl;
+    Info<< "[interfaceCompositionModel] composition().Y()[speciei]" << speciesName
+        << ": min = " <<      gMin(composition().Y()[speciei].primitiveField())
+        << ", mean = " << gAverage(composition().Y()[speciei].primitiveField())
+        << ", max = " <<      gMax(composition().Y()[speciei].primitiveField())
+        << endl;
 
     return Yf(speciesName, Tf) - composition().Y()[speciei];
 }

@@ -68,7 +68,13 @@ Foam::diffusiveMassTransferModels::Frossling::~Frossling()
 Foam::tmp<Foam::volScalarField>
 Foam::diffusiveMassTransferModels::Frossling::K() const
 {
+    Info << "[Frossling] average(Re) = " << average(pair_.Re()) << endl;
+    Info << "[Frossling] min(Re) = " << min(pair_.Re()) << endl;
+    Info << "[Frossling] average(Pr) = " << average(pair_.Pr()) << endl;
+    Info << "[Frossling] pair_.dispersed() = " << pair_.dispersed().name() << endl;
+    Info << "[Frossling] min(pair_.continuous().thermo().rho()) = " << min(pair_.continuous().thermo().rho()) << endl;
     volScalarField Sh(2 + 0.552*sqrt(pair_.Re())*cbrt(Le_*pair_.Pr()));
+    Info << "[Frossling] average(Sh) = " << average(Sh.primitiveField()) << endl;
 
     return 6*pair_.dispersed()*Sh/sqr(pair_.dispersed().d());
 }

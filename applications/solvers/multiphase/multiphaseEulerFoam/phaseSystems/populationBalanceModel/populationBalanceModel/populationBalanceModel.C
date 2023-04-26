@@ -177,6 +177,8 @@ void Foam::diameterModels::populationBalanceModel::registerSizeGroups
 
 void Foam::diameterModels::populationBalanceModel::createPhasePairs()
 {
+    // [Note] nucleation phase pair
+    // [Note] Separate velocity group phase change
     forAll(velocityGroups_, i)
     {
         const phaseModel& phasei = velocityGroups_[i].phase();
@@ -970,7 +972,9 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
                 (
                     "nucleationRate",
                     fluid_.time().timeName(),
-                    mesh_
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
                 ),
                 mesh_,
                 dimensionedScalar

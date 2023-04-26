@@ -64,6 +64,12 @@ Foam::heatTransferModels::RanzMarshall::K(const scalar residualAlpha) const
 {
     volScalarField Nu(2 + 0.6*sqrt(pair_.Re())*cbrt(pair_.Pr()));
 
+    Info << "[RanzMarshall] Nu " << min(Nu) << endl;
+    Info<< "[RanzMarshall]dispersed phase: "  << pair_.dispersed().name();
+    Info << "[RanzMarshall]max(pair_.dispersed(), residualAlpha)"
+         << min(max(pair_.dispersed(), residualAlpha)) << endl;
+    Info << "[RanzMarshall]pair_.continuous().thermo().kappa()"
+         << min(pair_.continuous().thermo().kappa()) << endl;
     return
         6
        *max(pair_.dispersed(), residualAlpha)

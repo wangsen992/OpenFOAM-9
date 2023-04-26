@@ -243,6 +243,8 @@ Foam::scalar Foam::radiationModels::radiativeIntensityRay::correct()
 {
     // Reset boundary heat flux to zero
     qr_.boundaryFieldRef() = 0.0;
+    qin_.boundaryFieldRef() = 0.0;
+    qem_.boundaryFieldRef() = 0.0;
 
     scalar maxResidual = -great;
 

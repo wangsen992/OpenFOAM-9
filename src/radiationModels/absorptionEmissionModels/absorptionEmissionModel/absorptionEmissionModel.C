@@ -177,6 +177,7 @@ void Foam::radiationModels::absorptionEmissionModel::correct
 {
     a = this->a();
     aj[0] =  a;
+    Info << "[Debug] Correction in main ae model." << endl;
 }
 
 

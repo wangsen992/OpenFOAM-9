@@ -24,17 +24,21 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "gradientEnergyCalculatedTemperatureFvPatchScalarField.H"
+#include "fvPatchFieldMapper.H"
+#include "volFields.H"
+#include "basicThermo.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug
-    (
-        gradientEnergyCalculatedTemperatureFvPatchScalarField,
-        0
-    );
-}
+// namespace Foam
+// {
+//     defineTypeNameAndDebug
+//     (
+//         gradientEnergyCalculatedTemperatureFvPatchScalarField,
+//         0
+//     );
+// }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -59,8 +63,11 @@ gradientEnergyCalculatedTemperatureFvPatchScalarField
     const dictionary& dict
 )
 :
-    calculatedFvPatchScalarField(p, iF),
-    heGradient_(p.size())
+    calculatedFvPatchScalarField(p, iF, dict),
+    heGradient_
+    (
+      scalarField("gradient", dict, p.size())
+    )
 {
     calculatedFvPatchScalarField::evaluate();
 }
@@ -123,3 +130,11 @@ void Foam::gradientEnergyCalculatedTemperatureFvPatchScalarField::rmap
 
 
 // ************************************************************************* //
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        gradientEnergyCalculatedTemperatureFvPatchScalarField
+    );
+}

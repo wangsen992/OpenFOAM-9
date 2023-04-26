@@ -211,6 +211,9 @@ public:
 
             //- Const access to total absorption coefficient
             inline const volScalarField& a() const;
+            
+            //- Const access to wavelength total absorption coefficient
+            inline const PtrList<volScalarField>& aLambda() const;
 
             //- Const access to wavelength total absorption coefficient
             inline const volScalarField& aLambda(const label lambdaI) const;
