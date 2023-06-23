@@ -108,12 +108,12 @@ Foam::diameterModels::velocityGroup::fSum() const
 
     forAll(sizeGroups_, i)
     {
-        Info << "[velocityGroup] gMin(sizeGroup_[i]) = " 
-             << gMin(sizeGroups_[i]) << endl;
-        Info << "[velocityGroup] gAverage(sizeGroup_[i]) = " 
-             << gAverage(sizeGroups_[i]) << endl;
-        Info << "[velocityGroup] gMax(sizeGroup_[i]) = " 
-             << gMax(sizeGroups_[i]) << endl;
+        // Info << "[velocityGroup] gMin(sizeGroup_[i]) = " 
+        //      << gMin(sizeGroups_[i]) << endl;
+        // Info << "[velocityGroup] gAverage(sizeGroup_[i]) = " 
+        //      << gAverage(sizeGroups_[i]) << endl;
+        // Info << "[velocityGroup] gMax(sizeGroup_[i]) = " 
+        //      << gMax(sizeGroups_[i]) << endl;
         sumSizeGroups += sizeGroups_[i];
     }
 
@@ -127,32 +127,23 @@ void Foam::diameterModels::velocityGroup::scale()
 
     forAll(sizeGroups_, i)
     {
-        Info << "[velocityGroup] group  " << i << endl;
-        Info << "[velocityGroup] gMin(sizeGroup_[i]) = " 
-             << gMin(sizeGroups_[i]) << endl;
-        Info << "[velocityGroup] gAverage(sizeGroup_[i]) = " 
-             << gAverage(sizeGroups_[i]) << endl;
-        Info << "[velocityGroup] gMax(sizeGroup_[i]) = " 
-             << gMax(sizeGroups_[i]) << endl;
-        sizeGroups_[i].max(0);
-        Info << "[velocityGroup] gMin(sizeGroup_[i]) = " 
-             << gMin(sizeGroups_[i]) << endl;
-        Info << "[velocityGroup] gAverage(sizeGroup_[i]) = " 
-             << gAverage(sizeGroups_[i]) << endl;
-        Info << "[velocityGroup] gMax(sizeGroup_[i]) = " 
-             << gMax(sizeGroups_[i]) << endl;
+        sizeGroups_[i].max(VSMALL);
     };
 
     f_ = fSum();
-    Info<< "[velocityGroup] gMin(fSum) = " << gMin(f_) << endl;
-    Info<< "[velocityGroup] gMax(fSum) = " << gMax(f_) << endl;
-    Info << "[velocityGroup] min point at : " << f_.mesh().C()[findMin(f_)] << endl;
+    // Info<< "[velocityGroup] gMin(fSum) = " << gMin(f_) << endl;
+    // Info<< "[velocityGroup] gMax(fSum) = " << gMax(f_) << endl;
+    // Info << "[velocityGroup] min point at : " << f_.mesh().C()[findMin(f_)] << endl;
 
     forAll(sizeGroups_, i)
     {
         sizeGroups_[i] /= f_;
 
         sizeGroups_[i].correctBoundaryConditions();
+        Info << "[velocityGroup] group  " << i << " avg, min, max: ";
+        Info << gAverage(sizeGroups_[i]) << ", "
+             << gMin(sizeGroups_[i]) << ", "
+             << gMax(sizeGroups_[i]) << endl;
     };
 }
 
