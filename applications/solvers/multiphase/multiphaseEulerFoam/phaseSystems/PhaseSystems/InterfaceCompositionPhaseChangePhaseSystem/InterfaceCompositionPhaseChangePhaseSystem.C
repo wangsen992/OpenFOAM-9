@@ -683,7 +683,7 @@ correctInterfaceThermo()
     // of Tf, so the solution for the temperature is newton-accelerated.
 
     Info << "[InterfaceComposition] Entering correctInterfaceThermo() " << endl;
-    BasePhaseSystem::correctInterfaceThermo();
+    // BasePhaseSystem::correctInterfaceThermo();
 
     // First loop 
     forAllConstIter
