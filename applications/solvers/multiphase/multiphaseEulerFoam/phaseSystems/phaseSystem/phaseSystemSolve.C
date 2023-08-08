@@ -227,18 +227,50 @@ void Foam::phaseSystem::solve
                 volScalarField::Internal& Sp = Sps[phasei];
                 volScalarField::Internal& Su = Sus[phasei];
 
+                double alphaMin = 1e-20;
                 forAll(dgdt, celli)
                 {
                     if (dgdt[celli] > 0)
                     {
-                        Sp[celli] -= dgdt[celli]/max(1 - alpha[celli], 1e-4);
-                        Su[celli] += dgdt[celli]/max(1 - alpha[celli], 1e-4);
+                        Sp[celli] -= dgdt[celli]/max(1 - alpha[celli], alphaMin);
+                        Su[celli] += dgdt[celli]/max(1 - alpha[celli], alphaMin);
                     }
                     else if (dgdt[celli] < 0)
                     {
-                        Sp[celli] += dgdt[celli]/max(alpha[celli], 1e-4);
+                        Sp[celli] += dgdt[celli]/max(alpha[celli], alphaMin);
                     }
                 }
+
+                // if (phase.name() == "water")
+                // {
+                //   forAll(dgdt, celli)
+                //   {
+                //       if (dgdt[celli] > 0)
+                //       {
+                //           Sp[celli] -= dgdt[celli]/max(1 - alpha[celli], 1e-20);
+                //           Su[celli] += dgdt[celli]/max(1 - alpha[celli], 1e-20);
+                //       }
+                //       else if (dgdt[celli] < 0)
+                //       {
+                //           Sp[celli] += dgdt[celli]/max(alpha[celli], 1e-20);
+                //       }
+                //   }
+                // }
+                // else if (phase.name() == "air")
+                // {
+                //   forAll(dgdt, celli)
+                //   {
+                //       if (dgdt[celli] > 0)
+                //       {
+                //           Sp[celli] -= dgdt[celli]/max(1 - alpha[celli], 1e-4);
+                //           Su[celli] += dgdt[celli]/max(1 - alpha[celli], 1e-4);
+                //       }
+                //       else if (dgdt[celli] < 0)
+                //       {
+                //           Sp[celli] += dgdt[celli]/max(alpha[celli], 1e-4);
+                //       }
+                //   }
+                // }
             }
         }
 
